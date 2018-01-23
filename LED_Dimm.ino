@@ -6,7 +6,7 @@
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
 #include "index.h"
-
+#include "SSID.h"
 
 extern "C" {
 #include "user_interface.h"
@@ -20,8 +20,6 @@ const byte PWM_PIN = 2;
 
 // You need to change below const char
 const char* host = "test";
-const char ssid[] = "ssid";
-const char pass[] = "pass";
 
 ESP8266WebServer server(80);   // 宣告網站伺服器物件與埠號
 ESP8266HTTPUpdateServer httpUpdater;
