@@ -8,15 +8,18 @@
 #include "index.h"
 
 
-//const byte ADC_PIN = A0;
-//const byte GPIO_4  = 4;
-//const byte GPIO_5  = 5;
+extern "C" {
+#include "user_interface.h"
+}
+#define ONE_MIN 60000
+os_timer_t myTimer;//定義一個 Timer
+
 //Only ESP01 Pin number
 //const byte LED_PIN = 0;
 const byte PWM_PIN = 2;
 
 // You need to change below const char
-const char* host = "test";       
+const char* host = "test";
 const char ssid[] = "ssid";
 const char pass[] = "pass";
 
@@ -30,19 +33,19 @@ void rootRouter() {
 }
 
 void setup() {
-//  pinMode(LED_PIN, OUTPUT);
+  //  pinMode(LED_PIN, OUTPUT);
   pinMode(PWM_PIN, OUTPUT);
-//  digitalWrite(PWM_PIN, HIGH);
+  //  digitalWrite(PWM_PIN, HIGH);
   analogWrite(PWM_PIN, 0);
-  
+
   Serial.begin(115200);
   WiFi.begin(ssid, pass);
   /*
-   *  若要指定IP位址，請自行在此加入WiFi.config()敘述。
-   WiFi.config(IPAddress(192,168,1,50),    // IP位址
+      若要指定IP位址，請自行在此加入WiFi.config()敘述。
+    WiFi.config(IPAddress(192,168,1,50),    // IP位址
                IPAddress(192,168,1,1),     // 閘道（gateway）位址
                IPAddress(255,255,255,0));  // 網路遮罩（netmask）
-   */
+  */
 
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);   // 等待WiFi連線
@@ -51,15 +54,16 @@ void setup() {
   Serial.println("");
   Serial.print("WiFi connected, IP: ");
   Serial.println(WiFi.localIP());  // 顯示ESP8266裝置的IP位址
-   // Port defaults to 8266
+  // Port defaults to 8266
   // ArduinoOTA.setPort(8266);
 
   // Hostname defaults to esp8266-[ChipID]
-// 主機名稱預設為"esp8266-晶片ID"
-ArduinoOTA.setHostname("test");  // 改成"test"
- 
-// 預設無需驗證密碼
-ArduinoOTA.setPassword((const char *)"12345678");  // 密碼設定為"12345678"
+  // 主機名稱預設為"esp8266-晶片ID"
+  ArduinoOTA.setHostname("test");  // 改成"test"
+
+  // 預設無需驗證密碼
+  ArduinoOTA.setPassword((const char *)"12345678");  // 密碼設定為"12345678"
+  
   ArduinoOTA.onStart([]() {
     Serial.println("Start");
   });
@@ -80,24 +84,25 @@ ArduinoOTA.setPassword((const char *)"12345678");  // 密碼設定為"12345678"
   ArduinoOTA.begin();
   server.on ( "/", rootRouter);
   server.on ( "/index.html", rootRouter);
-  
+//------- Dimming -----------------------------------------------
   server.on ("/DIMM", []() {
     String state = server.arg("dimm");
     analogWrite(PWM_PIN, state.toInt());
     Serial.print("PWM_PIN: ");
     Serial.println(state);
   });
-
+//------- Timer -----------------------------------------------
   server.on ("/TIME", []() {
     String val = server.arg("timevalue");
+    Timer_init(val.toInt());
     Serial.print("TIME: ");
-    Serial.println(val);
+    Serial.println(val.toInt());
   });
-  
+
   server.onNotFound([]() {
     server.send(404, "text/plain", "File NOT found!");
   });
-  
+
   MDNS.begin(host);
   Serial.println("mDNS responder started");
 
@@ -111,6 +116,18 @@ ArduinoOTA.setPassword((const char *)"12345678");  // 密碼設定為"12345678"
 }
 
 void loop() {
-    ArduinoOTA.handle();
+  ArduinoOTA.handle();
   server.handleClient();
+}
+
+void Timer_init(uint32_t count) {
+  os_timer_setfn(&myTimer, (os_timer_func_t *)timerISR, NULL);
+  os_timer_arm(&myTimer, count*ONE_MIN, true);
+}
+
+void timerISR(void *arg) {
+  os_timer_disarm(&myTimer);  // Close Timer
+  analogWrite(PWM_PIN, 0);    // Led dimming adjustment to 0 %.
+  Serial.print("ISR Occured");
+  // End of timerCallback
 }

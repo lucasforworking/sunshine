@@ -14,6 +14,10 @@ const char PAGE_INDEX[] PROGMEM = R"=====(
             width:  500px;
             margin: 15px;
         }
+        #LED_time {
+            width:  500px;
+            margin: 15px;
+        }
     </style>
 </head>
 <body>
@@ -42,6 +46,8 @@ const char PAGE_INDEX[] PROGMEM = R"=====(
         <label for="LED_T10M"> 10min </label>
         <input type="radio" id="LED_T5M" class="TMR" value="5" name="count">
         <label for="LED_T5M"> 5min </label> 
+        <input type="radio" id="LED_T1M" class="TMR" value="1" name="count">
+        <label for="LED_T1M"> 1min </label>         
     </div>
     <script src="https://code.jquery.com/jquery-1.12.1.min.js"></script>
     <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
