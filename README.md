@@ -10,10 +10,16 @@ IDE:Arduino 1.8.5
 
 Settings in IDE
 Module: Generic ESP8266 Module
+
 Flash Size: 4MB
+
 CPU Frequency:	80Mhz
+
 Flash Mode:	DIO
+
 Flash Frequency:	40Mhz
+
 Reset Method:	ck
+
 Debug Level: ALL
 
