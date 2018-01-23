@@ -15,4 +15,5 @@ CPU Frequency:	80Mhz
 Flash Mode:	DIO
 Flash Frequency:	40Mhz
 Reset Method:	ck
+Debug Level: ALL
 
