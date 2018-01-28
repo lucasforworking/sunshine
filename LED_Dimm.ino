@@ -19,8 +19,6 @@ os_timer_t myTimer;//定義一個 Timer
 //const byte LED_PIN = 0;
 const byte PWM_PIN = 2;
 
-
-
 ESP8266WebServer server(80);   // 宣告網站伺服器物件與埠號
 ESP8266HTTPUpdateServer httpUpdater;
 HTTPClient http;
@@ -39,7 +37,7 @@ void setup() {
 
   Serial.begin(115200);
   WiFi.begin(ssid, pass);
-  Serial.println("Connecting to Home"); 
+  Serial.println("Connecting to Home");
   /*
       若要指定IP位址，請自行在此加入WiFi.config()敘述。
     WiFi.config(IPAddress(192,168,1,50),    // IP位址
@@ -54,6 +52,7 @@ void setup() {
   Serial.println("");
   Serial.print("WiFi connected, IP: ");
   Serial.println(WiFi.localIP());  // 顯示ESP8266裝置的IP位址
+  //-------  OTA Start  -----------------------------------------------
   // Port defaults to 8266
   // ArduinoOTA.setPort(8266);
 
@@ -62,8 +61,8 @@ void setup() {
   ArduinoOTA.setHostname(host);
 
   // 預設無需驗證密碼
-//  ArduinoOTA.setPassword((const char *)"12345678");  // 密碼設定為"12345678"
-  
+  //  ArduinoOTA.setPassword((const char *)"12345678");  // 密碼設定為"12345678"
+
   ArduinoOTA.onStart([]() {
     Serial.println("Start");
   });
@@ -82,23 +81,39 @@ void setup() {
     else if (error == OTA_END_ERROR) Serial.println("End Failed");
   });
   ArduinoOTA.begin();
+  //-------  OTA End  -----------------------------------------------
+
   server.on ( "/", rootRouter);
   server.on ( "/index.html", rootRouter);
-//------- Dimming -----------------------------------------------
+
+  //------- On -----------------------------------------------
+  server.on ("/sw", []() {
+    String state = server.arg("led");
+    if (state == "on") {
+      analogWrite(PWM_PIN, 1024);
+    }
+    else if (state == "off"){
+      analogWrite(PWM_PIN, 0);
+    }
+    Serial.print("PWM_PIN: ");
+    Serial.println(state);
+    server.send(200, "text/html", "LED is <b>" + state + "</b>.");
+  });
+  //------- Dimming -----------------------------------------------
   server.on ("/DIMM", []() {
     String state = server.arg("dimm");
     analogWrite(PWM_PIN, state.toInt());
     Serial.print("PWM_PIN: ");
     Serial.println(state);
   });
-//------- Timer -----------------------------------------------
+  //------- Timer -----------------------------------------------
   server.on ("/TIME", []() {
     String val = server.arg("timevalue");
     Timer_init(val.toInt());
     Serial.print("TIME: ");
     Serial.println(val.toInt());
   });
-
+  //------- Not Found 404 -----------------------------------------------
   server.onNotFound([]() {
     server.send(404, "text/plain", "File NOT found!");
   });
@@ -122,12 +137,12 @@ void loop() {
 
 void Timer_init(uint32_t count) {
   os_timer_setfn(&myTimer, (os_timer_func_t *)timerISR, NULL);
-  os_timer_arm(&myTimer, count*ONE_MIN, true);
+  os_timer_arm(&myTimer, count * ONE_MIN, true);
 }
 
 void timerISR(void *arg) {
   os_timer_disarm(&myTimer);  // Close Timer
   analogWrite(PWM_PIN, 0);    // Led dimming adjustment to 0 %.
-  Serial.print("ISR Occured");
+  Serial.println("Timer ISR Occured!!");
   // End of timerCallback
 }
