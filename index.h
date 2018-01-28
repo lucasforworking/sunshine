@@ -25,13 +25,13 @@ const char PAGE_INDEX[] PROGMEM = R"=====(
     <br>
     雲亮度：
     <div id="LED_Dimm">
-        <input type="radio" id="LED_100" class="SW" value="100" name="dimm">
+        <input type="radio" id="LED_100" class="SW" value="1024" name="dimm">
         <label for="LED_100"> 100% </label>
-        <input type="radio" id="LED_75" class="SW" value="75" name="dimm">
+        <input type="radio" id="LED_75" class="SW" value="768" name="dimm">
         <label for="LED_75"> 75% </label>
-    <input type="radio" id="LED_50" class="SW"  value="50" name="dimm">
+    <input type="radio" id="LED_50" class="SW"  value="512" name="dimm">
         <label for="LED_50"> 50% </label>
-    <input type="radio" id="LED_25" class="SW" value="25" name="dimm">
+    <input type="radio" id="LED_25" class="SW" value="255" name="dimm">
         <label for="LED_25"> 25% </label>
     <input type="radio" id="LED_0" class="SW" value="0" name="dimm">
         <label for="LED_0"> 0% </label>

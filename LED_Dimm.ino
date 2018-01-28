@@ -10,6 +10,7 @@
 
 extern "C" {
 #include "user_interface.h"
+
 }
 #define ONE_MIN 60000
 os_timer_t myTimer;//定義一個 Timer
@@ -18,8 +19,7 @@ os_timer_t myTimer;//定義一個 Timer
 //const byte LED_PIN = 0;
 const byte PWM_PIN = 2;
 
-// You need to change below const char
-const char* host = "test";
+
 
 ESP8266WebServer server(80);   // 宣告網站伺服器物件與埠號
 ESP8266HTTPUpdateServer httpUpdater;
@@ -35,9 +35,11 @@ void setup() {
   pinMode(PWM_PIN, OUTPUT);
   //  digitalWrite(PWM_PIN, HIGH);
   analogWrite(PWM_PIN, 0);
+  os_timer_disarm(&myTimer);  // Close Timer
 
   Serial.begin(115200);
   WiFi.begin(ssid, pass);
+  Serial.println("Connecting to Home"); 
   /*
       若要指定IP位址，請自行在此加入WiFi.config()敘述。
     WiFi.config(IPAddress(192,168,1,50),    // IP位址
@@ -57,10 +59,10 @@ void setup() {
 
   // Hostname defaults to esp8266-[ChipID]
   // 主機名稱預設為"esp8266-晶片ID"
-  ArduinoOTA.setHostname("test");  // 改成"test"
+  ArduinoOTA.setHostname(host);
 
   // 預設無需驗證密碼
-  ArduinoOTA.setPassword((const char *)"12345678");  // 密碼設定為"12345678"
+//  ArduinoOTA.setPassword((const char *)"12345678");  // 密碼設定為"12345678"
   
   ArduinoOTA.onStart([]() {
     Serial.println("Start");
@@ -108,7 +110,7 @@ void setup() {
   server.begin();
   Serial.println("HTTP server started.");
 
-  MDNS.setInstanceName("Test's ESP8266");
+  MDNS.setInstanceName("Cloud's ESP8266");
   MDNS.addService("http", "tcp", 80);
   Serial.printf("HTTPUpdateServer ready! Open http://%s.local/update in your browser\n", host);
 }
